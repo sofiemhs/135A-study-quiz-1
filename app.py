@@ -1,230 +1,333 @@
 import streamlit as st
-import math
 
-# Page setup
 st.set_page_config(
     page_title="CEE 135A Structural Analysis Study Guide",
     page_icon="🏗️",
-    layout="wide"
+    layout="wide",
 )
 
-# App Title & Overview
-st.title("🏗️ CEE 135A Elementary Structural Analysis Exam Study Guide")
-st.markdown("""
-Welcome to the interactive study guide for **CEE 135A**! Navigate through the tabs below to review key lecture concepts, interactive calculators, step-by-step homework solutions, and self-assessment quizzes.
-""")
+st.title("🏗️ CEE 135A: Elementary Structural Analysis Study Guide & Solver")
+st.caption("Comprehensive review module covering Chapter 1, Chapter 2, Homework 1, and Homework 2.")
 
-# Tabs for Navigation
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📚 Module 1: Ch 1 - Types of Structures & Loads",
-    "📐 Module 2: Ch 2 - Determinacy, Stability & Equilibrium",
-    "✏️ Module 3: Homework 1 Solutions",
-    "⚙️ Module 4: Homework 2 Solutions",
-    "🎯 Module 5: Interactive Practice Quiz"
-])
+# Sidebar Navigation
+st.sidebar.title("📌 Navigation")
+module = st.sidebar.radio(
+    "Select Study Module:",
+    [
+        "1. Core Theory & Formulas (Ch. 1 & 2)",
+        "2. Determinacy & Stability Calculator",
+        "3. HW1 Problem 1: Load Path & LRFD",
+        "4. HW1 Problem 2: Wind Load Analysis",
+        "5. HW2 Problem 1: Structural Determinacy",
+        "6. HW2 Problem 2: Frame Reaction Solver",
+        "7. Interactive Practice Quiz",
+    ],
+)
+
+st.sidebar.markdown("---")
+st.sidebar.info("💡 **Tip**: Adjust the sliders and input boxes to see calculations update in real time!")
 
 # ==========================================
-# MODULE 1: CHAPTER 1 NOTES & CALCULATORS
+# MODULE 1: CORE THEORY & FORMULAS
 # ==========================================
-with tab1:
-    st.header("Module 1: Types of Structures & Loads (Chapter 1)")
+if module == "1. Core Theory & Formulas (Ch. 1 & 2)":
+    st.header("📚 Chapter 1 & Chapter 2 Core Concepts")
     
-    st.subheader("1. Classification of Structures")
+    tab1, tab2, tab3 = st.tabs(["Structural Types & Supports", "Wind & Seismic Loads", "LRFD & Superposition"])
+    
+    with tab1:
+        st.subheader("1. Structural Elements & Idealized Supports")
+        st.markdown("""
+        * **Tie Rods**: Slender members subjected to tensile forces[cite: 12].
+        * **Beams**: Horizontal members carrying vertical loads through shear force and bending moment[cite: 12].
+        * **Columns**: Vertical members resisting axial compressive loads[cite: 13].
+        * **Beam-Columns**: Vertical members subjected to both axial load and bending moment[cite: 13].
+        """)
+        
+        st.markdown("### Support Conditions & Reactions")
+        st.markdown("""
+        * **Rule of Thumb**: If a movement is **constrained** in a degree of freedom (DOF), a **force or moment develops** in that direction. If **unconstrained**, no reaction develops[cite: 5].
+        * **Roller Support**: 1 reaction force ($R_y$)[cite: 5].
+        * **Pin Support**: 2 reaction forces ($R_x, R_y$)[cite: 5].
+        * **Fixed Support**: 3 reactions ($R_x, R_y, M$)[cite: 5].
+        * **Torsional/Spring Support**: Develops reactive force/moment proportional to stiffness ($k$)[cite: 5].
+        """)
+
+    with tab2:
+        st.subheader("2. Environmental Loads (ASCE 7-22)")
+        st.markdown("#### Wind Loading (Static Approach)")
+        st.latex(r"q_z = 0.00256 \, K_z \, K_{zt} \, K_d \, K_e \, V^2 \quad \text{(lb/ft}^2\text{)}")
+        st.markdown("""
+        * **$V$**: Basic wind speed (3-second gust at 33 ft height)[cite: 18].
+        * **$K_z$**: Velocity pressure exposure coefficient[cite: 19].
+        * **$K_{zt}$**: Topographic factor ($1.0$ for flat ground)[cite: 19].
+        * **$K_d$**: Wind directionality factor[cite: 19].
+        * **$K_e$**: Ground elevation factor ($1.0$ standard)[cite: 19].
+        * **Design Wind Pressure**: $p = q \, G C_p - q_h (G C_{pi})$[cite: 19].
+        """)
+        
+        st.markdown("#### Seismic Loads (Equivalent Lateral Force Procedure)")
+        st.latex(r"V_{base} = C_s W")
+        st.latex(r"C_s = \frac{S_{DS}}{R / I_e}")
+        st.markdown("""
+        * **$V_{base}$**: Base shear[cite: 22].
+        * **$W$**: Total effective structural seismic weight[cite: 22].
+        * **$R$**: Response modification factor (accounts for ductility)[cite: 22].
+        * **$I_e$**: Importance factor[cite: 22].
+        """)
+
+    with tab3:
+        st.subheader("3. Structural Design & Load Combinations")
+        st.markdown("#### Load and Resistance Factor Design (LRFD)")
+        st.markdown("Structure is safe if **Required Strength ($\sum \gamma_i Q_i$) $\le$ Design Strength ($\phi R_n$)**[cite: 24].")
+        st.markdown("**Primary LRFD Combinations (ASCE 7-22)**[cite: 24]:")
+        st.markdown("""
+        1. **1.4D**
+        2. **1.2D + 1.6L + 0.5(L_r \text{ or } S \text{ or } R)**
+        3. **1.2D + 1.6(L_r \text{ or } S \text{ or } R) + (1.0L \text{ or } 0.5W)**
+        4. **1.2D + 1.0W + 1.0L + 0.5(L_r \text{ or } S \text{ or } R)**
+        5. **0.9D + 1.0W**
+        """)
+        st.markdown("#### Principle of Superposition")
+        st.markdown("""
+        Valid only under **linear-elastic material behavior** and **small deformation theory**[cite: 6]. Total displacements/internal forces equal the sum of displacements/forces caused by each load acting independently[cite: 6].
+        """)
+
+# ==========================================
+# MODULE 2: DETERMINACY & STABILITY CLASSIFIER
+# ==========================================
+elif module == "2. Determinacy & Stability Calculator":
+    st.header("⚙️ Degree of Indeterminacy (DI) Interactive Calculator")
+    
     st.markdown("""
-    - **Tie Rods**: Slender elements subjected to pure tension[cite: 12].
-    - **Beams**: Straight horizontal members resisting loads primarily through shear and bending moment[cite: 12].
-    - **Columns & Beam-Columns**: Vertical members in compression (columns) or combined axial compression and bending (beam-columns)[cite: 13].
-    - **Trusses**: Framework of slender members connected at joints, carrying loads primarily in tension or compression[cite: 13].
-    - **Cables & Arches**: Cables carry loads in pure tension (flexible, cannot buckle)[cite: 14]. Arches carry loads mainly in compression[cite: 14].
+    For a 2D coplanar structure with $n$ parts/members and $r$ total reaction forces[cite: 7]:
+    """)
+    st.latex(r"DI = r - 3n")
+    st.markdown("""
+    * **$r < 3n$**: Unstable (partially constrained)[cite: 8, 9].
+    * **$r = 3n$**: Statically Determinate[cite: 7].
+    * **$r > 3n$**: Statically Indeterminate to degree $DI = r - 3n$[cite: 7].
     """)
     
-    st.subheader("2. Structural Design Methodologies & Load Combinations")
-    st.markdown("""
-    - **Allowable Stress Design (ASD)**: Uses a single safety factor ($S.F.$)[cite: 23]:
-      $$\text{Calculated Elastic Stress} \le \text{Allowable Stress}$$
-    - **Load and Resistance Factor Design (LRFD)**: Uses load factors ($\gamma > 1$) for load uncertainty and resistance factors ($\phi < 1$) for material uncertainty[cite: 24]:
-      $$\text{Required Strength } (R_u) \le \text{Design Strength } (\phi R_n)$$
-    
-    **Primary LRFD Load Combinations (ASCE 7-22)**[cite: 24]:
-    1. $1.4 D$[cite: 24]
-    2. $1.2 D + 1.6 L + 0.5(L_r \text{ or } S \text{ or } R)$[cite: 24]
-    3. $1.2 D + 1.6(L_r \text{ or } S \text{ or } R) + (L \text{ or } 0.5 W)$[cite: 24]
-    4. $1.2 D + 1.0 W + L + 0.5(L_r \text{ or } S \text{ or } R)$[cite: 24]
-    5. $0.9 D + 1.0 W$[cite: 24]
-    """)
-    
-    st.subheader("3. Wind Load Equations (ASCE 7-22)")
-    st.markdown("""
-    **Velocity Pressure Formula (US Customary)**[cite: 18]:
-    $$q_z = 0.00256 \cdot K_z \cdot K_{zt} \cdot K_d \cdot K_e \cdot V^2 \quad (\text{psf})$$
-    - $V$: Basic wind speed (3-second gust at 33 ft in mph)[cite: 18]
-    - $K_z$: Velocity pressure exposure coefficient[cite: 19]
-    - $K_{zt}$: Topographic factor ($1.0$ for flat ground)[cite: 19]
-    - $K_d$: Wind directionality factor ($1.0$ for wind alone)[cite: 19]
-    - $K_e$: Ground elevation factor ($1.0$ standard)[cite: 19]
-    
-    **Design Wind Pressure for Enclosed Buildings**[cite: 19]:
-    $$p = q \cdot G \cdot C_p - q_h \cdot (G C_{pi}) \quad (\text{psf})$$
-    - $G$: Gust-effect factor ($\approx 0.85$ for rigid structures)[cite: 19]
-    - $C_p$: External pressure coefficient[cite: 20]
-    - $G C_{pi}$: Internal pressure coefficient ($\pm 0.18$ for enclosed structures)[cite: 20]
-    """)
-    
-    st.markdown("---")
-    st.subheader("🧮 Interactive Wind Velocity Pressure Calculator ($q_z$)")
     col1, col2 = st.columns(2)
     with col1:
-        V_input = st.number_input("Basic Wind Speed V (mph)", value=107.0, step=1.0)
-        Kz_input = st.number_input("Exposure Coeff K_z", value=0.98, step=0.01)
-        Kzt_input = st.number_input("Topographic Factor K_zt", value=1.0, step=0.05)
+        r_val = st.number_input("Total Reactive Forces (r):", min_value=1, value=6, step=1)
+        n_val = st.number_input("Total Number of Parts / Segments (n):", min_value=1, value=2, step=1)
+        parallel_or_concurrent = st.checkbox("Reactions are parallel or concurrent (Improper Constraint)[cite: 8, 9]")
+    
     with col2:
-        Kd_input = st.number_input("Directionality Factor K_d", value=1.0, step=0.05)
-        Ke_input = st.number_input("Elevation Factor K_e", value=1.0, step=0.05)
-    
-    qz_calc = 0.00256 * Kz_input * Kzt_input * Kd_input * Ke_input * (V_input ** 2)
-    st.success(f"**Calculated Velocity Pressure $q_z$:** {qz_calc:.2f} psf")
+        di = r_val - 3 * n_val
+        st.markdown("### Classification Result:")
+        if parallel_or_concurrent:
+            st.error("⚠️ **UNSTABLE** due to improper geometric constraints[cite: 8].")
+        elif di < 0:
+            st.error(f"⚠️ **UNSTABLE** (Partially Constrained). DI = {di}[cite: 8].")
+        elif di == 0:
+            st.success("✅ **STATICALLY DETERMINATE**. DI = 0[cite: 7].")
+        else:
+            st.info(f"🔵 **STATICALLY INDETERMINATE** to the degree **{di}**[cite: 7].")
 
 # ==========================================
-# MODULE 2: CHAPTER 2 NOTES & CALCULATORS
+# MODULE 3: HW1 PROBLEM 1 - LOAD PATH & LRFD
 # ==========================================
-with tab2:
-    st.header("Module 2: Structural Indeterminacy, Stability & Equilibrium (Chapter 2)")
+elif module == "3. HW1 Problem 1: Load Path & LRFD":
+    st.header("📝 Homework 1 - Problem 1: Concrete Frame Analysis")
     
-    st.subheader("1. Static Determinacy & Degree of Indeterminacy ($DI$)")
     st.markdown("""
-    For a 2D planar structure composed of $n$ members or structural parts and $r$ support reactions:
-    $$DI = r + 3m - 3n - r_i$$
-    *Or simplified for structures evaluated as free bodies/joints*:
-    $$DI = r - 3n$$
-    
-    - **$DI < 0$**: Unstable (partially constrained)[cite: 7, 8].
-    - **$DI = 0$**: Statically Determinate[cite: 7].
-    - **$DI > 0$**: Statically Indeterminate to the $DI$-th degree[cite: 7].
+    **Problem Setup**[cite: 3]:
+    * **Slab Dimensions**: $L = 30\text{ ft}$, $W = 20\text{ ft}$
+    * **Dead Load (DL)**: $80\text{ psf}$, **Live Load (LL)**: $50\text{ psf}$
+    * **Beam CD Dimensions**: $12\text{ in. wide} \times 24\text{ in. deep}$
+    * **Concrete Unit Weight**: $150\text{ pcf}$
+    * **Tributary Width**: $10\text{ ft}$
     """)
     
-    st.subheader("2. Structural Stability Rules")
-    st.markdown("""
-    A structure can be **unstable** even if $r \ge 3n$ if[cite: 9]:
-    1. **Parallel Reactions**: All reaction forces act in parallel directions, leaving horizontal or vertical movement unconstrained[cite: 8, 9].
-    2. **Concurrent Reactions**: All reaction force vectors intersect at a single common point $O$, allowing unconstrained rotation about $O$ ($\sum M_O \ne 0$)[cite: 8, 9].
-    3. **Internal Collapse Mechanism**: The internal arrangement of hinges/links creates a collapsible structure[cite: 9].
-    """)
+    st.subheader("Interactive Load Calculator")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        dl_psf = st.number_input("Floor Dead Load (psf):", value=80.0)
+        ll_psf = st.number_input("Floor Live Load (psf):", value=50.0)
+    
+    with col2:
+        trib_width = st.number_input("Tributary Width (ft):", value=10.0)
+        conc_density = st.number_input("Concrete Density (pcf):", value=150.0)
+    
+    with col3:
+        b_in = st.number_input("Beam Width (in):", value=12.0)
+        h_in = st.number_input("Beam Height (in):", value=24.0)
+
+    # Calculations
+    w_floor_dl = dl_psf * trib_width
+    w_floor_ll = ll_psf * trib_width
+    beam_self_weight = (b_in / 12.0) * (h_in / 12.0) * conc_density
+    w_total_dl = w_floor_dl + beam_self_weight
+    
+    combo1_1_4D = 1.4 * w_total_dl
+    combo2_1_2D_1_6L = 1.2 * w_total_dl + 1.6 * w_floor_ll
     
     st.markdown("---")
-    st.subheader("🧮 Interactive Indeterminacy Calculator")
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        r_val = st.number_input("Support Reactions (r)", value=3, min_value=0, step=1)
-    with c2:
-        n_val = st.number_input("Number of Parts / Segments (n)", value=1, min_value=1, step=1)
-    with c3:
-        ri_val = st.number_input("Internal Releases / Hinges (r_i)", value=0, min_value=0, step=1)
+    st.subheader("Step-by-Step Solutions")
     
-    di_calc = r_val - 3 * n_val - ri_val
-    if di_calc < 0:
-        st.error(f"Degree of Indeterminacy: {di_calc} ➔ **Unstable Structure**")
-    elif di_calc == 0:
-        st.success(f"Degree of Indeterminacy: {di_calc} ➔ **Statically Determinate**")
-    else:
-        st.warning(f"Degree of Indeterminacy: {di_calc} ➔ **Statically Indeterminate to the {di_calc} Degree**")
-
-# ==========================================
-# MODULE 3: HOMEWORK 1 SOLUTIONS
-# ==========================================
-with tab3:
-    st.header("✏️ Homework 1 Complete Solutions & Walkthroughs")
-    
-    st.subheader("Problem 1: Slab Load Transfer & Beam Frame LRFD Analysis")
+    st.markdown("### a) Gravity-Load Transfer Path[cite: 3]")
     st.markdown("""
-    **Given Parameters:**
-    - Slab Dimensions: $30\text{ ft (length)} \times 20\text{ ft (width)}$ supported by beams AB and CD[cite: 3].
-    - Dead Load ($DL_{slab}$): $80\text{ psf}$, Live Load ($LL_{slab}$): $50\text{ psf}$[cite: 3].
-    - Beam Cross-Section: $12\text{ in.} \times 24\text{ in.}$, Concrete Density: $150\text{ pcf}$[cite: 3].
+    **Floor Slab $\rightarrow$ Beams (AB & CD) $\rightarrow$ Columns (1 to 4) $\rightarrow$ Footings / Ground**[cite: 6]
     """)
     
-    with st.expander("📌 Part (a): Gravity-Load Transfer Path"):
-        st.markdown("""
-        **Transfer Path:**
-        $$\text{Floor Slab} \longrightarrow \text{Beams AB \& CD (Tributary Width = } 10\text{ ft)} \longrightarrow \text{Columns 1-4} \longrightarrow \text{Footings} \longrightarrow \text{Ground}$$
-        - Since the slab is supported by beams along two parallel edges (30 ft length), it acts as a **one-way slab**[cite: 3, 6].
-        - Tributary width for beam CD $= 20\text{ ft} / 2 = 10\text{ ft}$[cite: 3].
-        """)
-        
-    with st.expander("📌 Part (b): Line Load Calculations"):
-        st.markdown("""
-        1. **Floor Dead Load line load ($w_{D,floor}$):**
-           $$w_{D,floor} = 80\text{ psf} \times 10\text{ ft} = 800\text{ lb/ft}$$
-        2. **Floor Live Load line load ($w_L$):**
-           $$w_L = 50\text{ psf} \times 10\text{ ft} = 500\text{ lb/ft}$$
-        3. **Beam Self-Weight ($w_{beam}$):**
-           $$A_{beam} = \frac{12\text{ in.}}{12} \times \frac{24\text{ in.}}{12} = 1\text{ ft} \times 2\text{ ft} = 2\text{ ft}^2$$
-           $$w_{beam} = 2\text{ ft}^2 \times 150\text{ pcf} = 300\text{ lb/ft}$$
-        4. **Total Dead Load ($w_D$):**
-           $$w_D = w_{D,floor} + w_{beam} = 800 + 300 = 1100\text{ lb/ft}$$
-        """)
-        
-    with st.expander("📌 Part (c) & (d): LRFD Load Combinations & Governing Load"):
-        st.markdown("""
-        - **Combination 1 ($1.4D$):**
-          $$w_{u1} = 1.4 \times 1100\text{ lb/ft} = 1540\text{ lb/ft} = 1.54\text{ kips/ft}$$
-        - **Combination 2 ($1.2D + 1.6L$):**
-          $$w_{u2} = (1.2 \times 1100) + (1.6 \times 500) = 1320 + 800 = 2120\text{ lb/ft} = 2.12\text{ kips/ft}$$
-        
-        **Governing Load Case for Design:**
-        Case (2) ($1.2D + 1.6L = 2120\text{ lb/ft}$) governs the design because $2120\text{ lb/ft} > 1540\text{ lb/ft}$.
-        """)
+    st.markdown("### b) Distributed Line Loads on Beam CD")
+    st.write(f"1. **Floor Dead Load**: $w={dl_psf:.1f} \\times {trib_width:.1f} = \\mathbf{{{w_floor_dl:.1f} \\text{{ lb/ft}}}}$")
+    st.write(f"2. **Floor Live Load**: $w={ll_psf:.1f} \\times {trib_width:.1f} = \\mathbf{{{w_floor_ll:.1f} \\text{{ lb/ft}}}}$")
+    st.write(f"3. **Beam Self-Weight**: $w=\\frac{{{b_in:.0f}}}{{12}} \\times \\frac{{{h_in:.0f}}}{{12}} \\times {conc_density:.0f} = \\mathbf{{{beam_self_weight:.1f} \\text{{ lb/ft}}}}$")
+    st.write(f"   **Total Beam Dead Load ($w_D$)**: ${w_floor_dl:.1f} + {beam_self_weight:.1f} = \\mathbf{{{w_total_dl:.1f} \\text{{ lb/ft}}}}$")
+    
+    st.markdown("### c) Factored LRFD Line Loads[cite: 3]")
+    st.write(f"1. **Comb 1 ($1.4D$)**: $1.4 \\times {w_total_dl:.1f} = \\mathbf{{{combo1_1_4D:.1f} \\text{{ lb/ft}}}}$[cite: 24]")
+    st.write(f"2. **Comb 2 ($1.2D + 1.6L$)**: $1.2 \\times {w_total_dl:.1f} + 1.6 \\times {w_floor_ll:.1f} = \\mathbf{{{combo2_1_2D_1_6L:.1f} \\text{{ lb/ft}}}}$[cite: 24]")
+    
+    st.markdown("### d) Design Governing Load[cite: 3]")
+    governing = "1.2D + 1.6L" if combo2_1_2D_1_6L > combo1_1_4D else "1.4D"
+    st.success(f"**Governing Load Combination**: Use **{governing}** (${max(combo1_1_4D, combo2_1_2D_1_6L):.1f}\\text{{ lb/ft}}$).")
 
-    st.markdown("---")
-    st.subheader("Problem 2: Wind Load Analysis (ASCE 7-22)")
+# ==========================================
+# MODULE 4: HW1 PROBLEM 2 - WIND LOAD ANALYSIS
+# ==========================================
+elif module == "4. HW1 Problem 2: Wind Load Analysis":
+    st.header("📝 Homework 1 - Problem 2: Wind Load Calculation (ASCE 7-22)")
+    
     st.markdown("""
-    **Given Parameters:** Storage Building in Chicago, IL ($41.5500^\circ\text{N}, 87.3700^\circ\text{W}$)[cite: 4].
-    - Risk Category II, Site Class B, Exposure C[cite: 4].
-    - Dimensions: Length $= 150\text{ ft}$, Width $= 160\text{ ft}$ ($80\text{ ft} + 80\text{ ft}$), Eave Height $= 30\text{ ft}$, Roof Pitch $= 15^\circ$[cite: 4].
+    **Structure Properties**[cite: 4]:
+    * Location: Chicago (41.5500° N, 87.3700° W)
+    * Classification: Risk Category II, Site Class B, Exposure C
+    * Dimensions: Height $h = 30\text{ ft}$, Roof Pitch = $15^\circ$, Width = $160\text{ ft}$
     """)
     
-    with st.expander("📌 Step-by-Step Wind Calculations"):
-        st.markdown("""
-        1. **Basic Wind Speed ($V$):** From ASCE Hazard Tool for Chicago, $V \approx 107\text{ mph}$[cite: 4].
-        2. **Mean Roof Height ($h$):**
-           $$h_{roof, peak} = 30 + 80 \times \tan(15^\circ) = 30 + 80(0.2679) = 51.43\text{ ft}$$
-           $$h = \frac{30 + 51.43}{2} = 40.72\text{ ft}$$
-        3. **Velocity Pressure ($q_z$ at eave height $z=30\text{ ft}$ & $q_h$ at $h=40.72\text{ ft}$):**
-           - For Exposure C: $K_z(30\text{ ft}) \approx 0.98$, $K_h(40.72\text{ ft}) \approx 1.04$.
-           - $q_z = 0.00256 \times 0.98 \times 1.0 \times 1.0 \times 1.0 \times (107)^2 = 28.72\text{ psf}$[cite: 18, 19]
-           - $q_h = 0.00256 \times 1.04 \times 1.0 \times 1.0 \times 1.0 \times (107)^2 = 30.48\text{ psf}$[cite: 18, 19]
-        """)
+    st.subheader("Step-by-Step ASCE 7 Procedure")
+    
+    st.markdown("### a) Basic Wind Speed ($V$)[cite: 4]")
+    st.info("From the ASCE Hazard Tool for Chicago, basic wind speed **$V \\approx 107\\text{ mph}$**[cite: 18].")
+    
+    st.markdown("### b) Velocity Pressure ($q_z$)[cite: 4]")
+    st.latex(r"q_z = 0.00256 \, K_z \, K_{zt} \, K_d \, K_e \, V^2")
+    
+    v_wind = st.slider("Basic Wind Speed V (mph):", 90, 130, 107)
+    kz = st.number_input("K_z factor:", value=0.98)
+    kd = st.number_input("K_d factor:", value=0.85)
+    
+    qz = 0.00256 * kz * 1.0 * kd * 1.0 * (v_wind ** 2)
+    st.metric("Velocity Pressure q_z (psf):", f"{qz:.2f} psf")
+    
+    st.markdown("### c) Design Wind Pressure ($p$)[cite: 4]")
+    st.latex(r"p = q \, G C_p - q_h (G C_{pi})")
+    st.markdown("""
+    * **Rigid Structure Gust Factor ($G$)**: $0.85$[cite: 19]
+    * **Internal Pressure Coefficient ($G C_{pi}$)**: $\\pm 0.18$ for fully enclosed buildings[cite: 20]
+    """)
 
 # ==========================================
-# MODULE 4: HOMEWORK 2 SOLUTIONS
+# MODULE 5: HW2 PROBLEM 1 - STRUCTURAL DETERMINACY
 # ==========================================
-with tab4:
-    st.header("⚙️ Homework 2 Complete Solutions & Walkthroughs")
+elif module == "5. HW2 Problem 1: Structural Determinacy":
+    st.header("📝 Homework 2 - Problem 1: Structural Determinacy Classifications[cite: 1]")
     
-    st.subheader("Problem 1: Structural Classification (Determinacy & Stability)")
+    prob_a, prob_b = st.tabs(["Structures (a) & (b)", "Structures (c) & (d)"])
     
-    p1_a, p1_b = st.columns(2)
-    with p1_a:
+    with prob_a:
+        st.subheader("Structure (a)")
         st.markdown("""
-        **(a) Cantilevered Beam with Sleeve / Guide Support**[cite: 1]
-        - **Reactions ($r$):** 2 reactions at sleeve guide (vertical force + moment)[cite: 1, 5].
-        - **Equations ($3n$):** 3 equilibrium equations[cite: 7].
-        - **$r < 3n$ ($2 < 3$):** **Unstable** (partially constrained against horizontal force)[cite: 8].
+        * **Description**: Horizontal beam supported by guided roller bearings on the left[cite: 1].
+        * **Reactions**: Guided roller provides $1$ vertical reaction + $1$ moment reaction ($r = 2$)[cite: 5].
+        * **Calculation**: $DI = r - 3n = 2 - 3(1) = -1$[cite: 8].
+        * **Verdict**: 🔴 **UNSTABLE** (Unconstrained in horizontal $x$-direction)[cite: 8].
+        """)
         
-        **(b) Two-Bay Portal Frame on Pin Supports**[cite: 1]
-        - **Reactions ($r$):** 2 pin supports = 4 reactions[cite: 1, 5].
-        - **Members ($m$):** 7 rigid members forming closed loops[cite: 1].
-        - **Degree of Indeterminacy:** Using $DI = 3(\text{loops}) - \text{releases} = 3(2) - 0 = \mathbf{6}$[cite: 8].
-        - **Result:** **Statically Indeterminate to the 6th Degree**[cite: 1, 7].
+        st.markdown("---")
+        st.subheader("Structure (b)")
+        st.markdown("""
+        * **Description**: Multi-bay rigid portal frame with 2 pin supports[cite: 1].
+        * **Calculation**: $DI = 3 \times (\text{closed loops}) = 3(2) = 6$[cite: 8].
+        * **Verdict**: 🔵 **STATICALLY INDETERMINATE to the 6th degree**[cite: 8].
         """)
-    with p1_b:
-        stHere is a single, self-contained Python Streamlit application (`app.py`) designed to serve as an interactive, fully detailed study guide for your quiz on **CEE 135A: Elementary Structural Analysis**.
 
-This interactive app covers all concepts, formulas, step-by-step problem breakdowns, and quiz questions directly from your 4 documents (Homework 1[cite: 3, 4], Homework 2[cite: 1, 2], Chapter 1 Notes[cite: 11], Chapter 2 Notes[cite: 5]).
+    with prob_b:
+        st.subheader("Structure (c)")
+        st.markdown("""
+        * **Description**: Fixed support at left ($r=3$), pin at right ($r=2$), internal hinge ($c=1$)[cite: 1, 5, 8].
+        * **Calculation**: $DI = r - (3n - c) = 5 - (6 - 1) = 0$[cite: 8].
+        * **Verdict**: 🟢 **STATICALLY DETERMINATE** ($DI = 0$) and **STABLE**[cite: 7].
+        """)
+        
+        st.markdown("---")
+        st.subheader("Structure (d)")
+        st.markdown("""
+        * **Description**: Frame with inclined tie rod ($1$ reaction) and pin base ($2$ reactions)[cite: 1].
+        * **Calculation**: $DI = r - 3n = 3 - 3(1) = 0$[cite: 8].
+        * **Verdict**: 🟢 **STATICALLY DETERMINATE** ($DI = 0$) and **STABLE**[cite: 7].
+        """)
 
----
+# ==========================================
+# MODULE 6: HW2 PROBLEM 2 - FRAME REACTION SOLVER
+# ==========================================
+elif module == "6. HW2 Problem 2: Frame Reaction Solver":
+    st.header("📝 Homework 2 - Problem 2: Reaction Solver[cite: 2]")
+    
+    st.markdown("""
+    **Problem Geometry & Loading**[cite: 2]:
+    * Frame $ABCD$: Height $AB = 2.25\text{ m}$, Width $BC = 3.0\text{ m}$.
+    * Top beam $AC$: Trapezoidal load ($6\text{ kN/m}$ at $A$ to $3\text{ kN/m}$ at $C$).
+    * Bottom beam $BD$: Uniform upward load ($4\text{ kN/m}$).
+    * Pins at $C$ and $D$. Diagonal member $BC$.
+    """)
+    
+    st.subheader("Calculated Support Reactions")
+    
+    res_col1, res_col2 = st.columns(2)
+    with res_col1:
+        st.metric("C_x (Horizontal Reaction at C)", "+2.00 kN (Right)")
+        st.metric("C_y (Vertical Reaction at C)", "+7.50 kN (Upward)")
+    with res_col2:
+        st.metric("D_x (Horizontal Reaction at D)", "-2.00 kN (Left)")
+        st.metric("D_y (Vertical Reaction at D)", "-6.00 kN (Downward)")
+        
+    st.markdown("### Internal Member Forces:")
+    st.write("* **Member BC (Diagonal Tie)**: $2.50\\text{ kN}$ (Tension)")
+    st.write("* **Member AB (Vertical Column)**: $7.50\\text{ kN}$ (Compression)")
 
-### Instructions to Run Locally & Push to GitHub / Streamlit Community Cloud
+# ==========================================
+# MODULE 7: INTERACTIVE PRACTICE QUIZ
+# ==========================================
+elif module == "7. Interactive Practice Quiz":
+    st.header("🧪 Interactive Quiz - Test Your Knowledge!")
+    
+    score = 0
+    
+    q1 = st.radio(
+        "1. What is the Degree of Indeterminacy (DI) formula for a 2D frame with r reactions and n members?[cite: 7]",
+        ["DI = r - 2n", "DI = r - 3n", "DI = 3n - r", "DI = 2r - n"]
+    )
+    if q1 == "DI = r - 3n":
+        score += 1
 
-1. **Install Dependencies**:
-   ```bash
-   pip install streamlit
+    q2 = st.radio(
+        "2. Which principle allows us to sum displacements caused by individual loads?[cite: 6]",
+        ["Principle of Virtual Work", "Principle of Superposition", "Maxwell-Betti Reciprocal Theorem", "Euler-Bernoulli Law"]
+    )
+    if q2 == "Principle of Superposition":
+        score += 1
+
+    q3 = st.radio(
+        "3. In ASCE 7 LRFD design, what is the dead load factor in combination 1.2D + 1.6L?[cite: 24]",
+        ["1.4", "1.6", "1.2", "0.9"]
+    )
+    if q3 == "1.2":
+        score += 1
+
+    q4 = st.radio(
+        "4. A pin support in a 2D coplanar structure provides how many reaction forces?[cite: 5]",
+        ["1 force", "2 forces", "3 forces", "2 forces and 1 moment"]
+    )
+    if q4 == "2 forces":
+        score += 1
+
+    if st.button("Submit Quiz"):
+        st.balloons()
+        st.success(f"🎉 Your Score: **{score} / 4**")
